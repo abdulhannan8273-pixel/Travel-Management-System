@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     'apps.wishlist',
     'apps.reports',
     'apps.payments',
+    'apps.destinations',
+    'apps.locations',
 ]
 
 MIDDLEWARE = [
