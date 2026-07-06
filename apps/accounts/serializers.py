@@ -1,9 +1,5 @@
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework import serializers
 from .models import User
 
@@ -35,12 +31,12 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
-        user = authenticate(email=data["email"], password=data["password"])
+    def validate(self, attrs):
+        user = authenticate(email=attrs["email"], password=attrs["password"])
         if not user:
             raise serializers.ValidationError("Invalid credentials")
-        data["user"] = user
-        return data
+        attrs["user"] = user
+        return attrs
     
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:

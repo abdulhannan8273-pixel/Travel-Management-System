@@ -1,0 +1,7 @@
+country_code, state_code, city, name, description, price, rating, best_time_to_visit
+IN, RJ, Jaipur, Hawa Mahal, Pink City Palace, 500, 4.8, October-March
+IN, RJ, Jaipur, Amber Fort, Historic Fort, 700, 4.9, October-March
+IN, RJ, Jodhpur, Mehrangarh Fort, Famous Fort, 800, 4.9, October-March
+IN, RJ, Udaipur, City Palace, Royal Palace, 900, 4.8, September-February
+IN, UP, Agra, Taj Mahal, World Famous Monument, 1200, 5.0, November-February
+IN, MH, Mumbai, Gateway of India, Historic Landmrak, 300, 4.6, November-February

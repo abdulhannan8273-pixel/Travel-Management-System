@@ -1,10 +1,7 @@
-from django.shortcuts import render
-
-# Create your views here.
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.core.mail import send_mail
 from rest_framework import status
@@ -13,10 +10,18 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from .serializers import RegisterSerializer,LoginSerializer,ProfileSerializer,ChangePasswordSerializer,ForgotPasswordSerializer, ResendVerificationSerializer, ResetPasswordSerializer, ResendVerificationSerializer
+from .serializers import (
+    RegisterSerializer,
+    LoginSerializer,
+    ProfileSerializer,
+    ChangePasswordSerializer,
+    ForgotPasswordSerializer,
+    ResendVerificationSerializer,
+    ResetPasswordSerializer,
+)
 from .models import User
 
-
+ 
 class RegisterView(CreateAPIView):
     queryset = User .objects.all()
     serializer_class = RegisterSerializer
@@ -131,6 +136,7 @@ class VerifyEmailView(GenericAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
             
         user.is_email_verified = True
+        user.email_verification_token = None
         user.save()
         return Response({"success": True, "message": "Email verified successfully."}, status=status.HTTP_200_OK)
     
