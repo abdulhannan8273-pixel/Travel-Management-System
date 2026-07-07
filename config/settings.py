@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'apps.destinations',
     'apps.locations',
     'apps.bookings',
+    'apps.home',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +76,8 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = 'accounts.User'
+
+AUTHENTICATION_BACKENDS = ["apps.accounts.backends.EmailBackend"]
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

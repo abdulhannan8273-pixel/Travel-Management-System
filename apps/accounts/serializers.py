@@ -32,12 +32,23 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        user = authenticate(email=attrs["email"], password=attrs["password"])
+        user = authenticate(
+            email=attrs["email"],
+            password=attrs["password"]
+        )
+
         if not user:
-            raise serializers.ValidationError("Invalid credentials")
+            raise serializers.ValidationError("Invalid credentials.")
+
+        if not getattr(user, "is_email_verified", True):
+            raise serializers.ValidationError(
+                "Please verify your email before logging in."
+            )
+
         attrs["user"] = user
         return attrs
-    
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

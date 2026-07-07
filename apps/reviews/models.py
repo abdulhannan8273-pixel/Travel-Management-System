@@ -23,3 +23,5 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.destination.name}"
+    class Meta:
+            unique_together = ("user", "destination")

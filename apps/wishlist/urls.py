@@ -3,6 +3,6 @@ from .views import WishlistViewSet
 
 router = DefaultRouter()
 
-router.register("wishlist", WishlistViewSet, basename="wishlist")
+router.register("", WishlistViewSet, basename="wishlist")
 
 urlpatterns = router.urls
