@@ -66,16 +66,54 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
+import re
+from rest_framework import serializers
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "phone", "profile_image", "created_at",]
+        fields = [
+            "id",
+            "username",
+            "email",
+            "phone",
+            "profile_image",
+            "created_at",
+        ]
         read_only_fields = [
             "id",
             "username",
             "email",
             "created_at",
         ]
+    def validate_profile_image(self, value):
+        if not value:
+            return value
+
+        # Maximum file size: 2 MB
+        if value.size > 2 * 1024 * 1024:
+            raise serializers.ValidationError(
+                "Image size must not exceed 2 MB."
+            )
+
+        # Allowed extensions
+        allowed_extensions = ["jpg", "jpeg", "png", "webp"]
+
+        extension = value.name.split(".")[-1].lower()
+
+        if extension not in allowed_extensions:
+            raise serializers.ValidationError(
+                "Only JPG, JPEG, PNG and WEBP images are allowed."
+            )
+
+        return value
+
+    def validate_phone(self, value):
+        if value and not re.fullmatch(r"^[6-9]\d{9}$", value):
+            raise serializers.ValidationError(
+                "Enter a valid 10-digit Indian mobile number."
+            )
+        return value
        
     
 
