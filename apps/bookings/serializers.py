@@ -31,3 +31,20 @@ class BookingSerializer(serializers.ModelSerializer):
                 )
 
         return attrs
+    def validate_number_of_people(self, value):
+        if value < 1:
+            raise serializers.ValidationError(
+                "At least one traveler is required."
+            )
+
+        if value > 20:
+            raise serializers.ValidationError(
+                "A maximum of 20 travelers is allowed in a single booking."
+            )
+
+        return value
+    
+class BookingStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=["pending", "confirmed", "completed", "cancelled"]
+    )
