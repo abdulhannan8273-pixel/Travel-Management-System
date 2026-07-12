@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +29,8 @@ urlpatterns = [
     path("api/reviews/", include("apps.reviews.urls")),
     path("api/wishlist/", include("apps.wishlist.urls")),
     path("api/home/", include("apps.home.urls")),
+    path("api/", include("apps.hotels.urls")),
+    path("api/", include("apps.flights.urls")),
 ]
 
 if settings.DEBUG:
