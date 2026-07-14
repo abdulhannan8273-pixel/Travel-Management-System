@@ -31,6 +31,9 @@ urlpatterns = [
     path("api/home/", include("apps.home.urls")),
     path("api/", include("apps.hotels.urls")),
     path("api/", include("apps.flights.urls")),
+    path("api/", include("apps.payments.urls")),
+    path("api/", include("apps.reports.urls")),
+    path("api/", include("apps.dashboard.urls")),
 ]
 
 if settings.DEBUG:

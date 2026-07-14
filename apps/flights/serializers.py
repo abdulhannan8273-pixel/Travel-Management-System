@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Airline, Airport, Flight
-
+from .models import Airline, Airport, Flight, FlightBooking
+from decimal import Decimal
+from django.utils import timezone
 
 class AirlineSerializer(serializers.ModelSerializer):
     class Meta:
@@ -84,3 +85,56 @@ class FlightSerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+
+class FlightBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FlightBooking
+        fields = "__all__"
+        read_only_fields = [
+            "id",
+            "user",
+            "total_price",
+            "booking_date",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate(self, attrs):
+        flight = attrs["flight"]
+        passengers = attrs["passengers"]
+
+        # Flight cancelled
+        if flight.status == "cancelled":
+            raise serializers.ValidationError(
+                "This flight has been cancelled."
+            )
+
+        # Flight already departed
+        if flight.departure_time <= timezone.now():
+            raise serializers.ValidationError(
+                "This flight has already departed."
+            )
+
+        # Seat validation
+        if passengers > flight.available_seats:
+            raise serializers.ValidationError(
+                "Not enough seats available."
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        flight = validated_data["flight"]
+        passengers = validated_data["passengers"]
+
+        validated_data["user"] = self.context["request"].user
+
+        validated_data["total_price"] = (
+            Decimal(flight.price) * passengers
+        )
+
+        flight.available_seats -= passengers
+        flight.save()
+
+        return super().create(validated_data)

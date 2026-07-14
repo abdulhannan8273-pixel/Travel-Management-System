@@ -1,13 +1,19 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from apps.accounts.permissions import IsAdminOrReadOnly
-from .models import Airline, Airport, Flight
+from .models import Airline, Airport, Flight, FlightBooking
 from .serializers import (
     AirlineSerializer,
     AirportSerializer,
     FlightSerializer,
+    FlightBookingSerializer,
 )
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+
 
 
 class AirlineViewSet(viewsets.ModelViewSet):
@@ -106,3 +112,44 @@ class FlightViewSet(viewsets.ModelViewSet):
         "price",
         "created_at",
     ]
+
+
+class FlightBookingViewSet(viewsets.ModelViewSet):
+    queryset = FlightBooking.objects.select_related("user", "flight")
+    serializer_class = FlightBookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    ...
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return FlightBooking.objects.select_related(
+                "user",
+                "flight"
+            )
+
+        return FlightBooking.objects.select_related(
+            "user",
+            "flight"
+        ).filter(user=self.request.user)
+
+    @action(detail=True, methods=["patch"])
+    def cancel(self, request, pk=None):
+        booking = self.get_object()
+
+        if booking.status == "cancelled":
+            return Response(
+                {"message": "Booking is already cancelled."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        booking.status = "cancelled"
+
+        booking.flight.available_seats += booking.passengers
+        booking.flight.save()
+
+        booking.save()
+
+        return Response(
+            {"message": "Booking cancelled successfully."}
+        )
