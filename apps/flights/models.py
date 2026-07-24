@@ -136,40 +136,43 @@ class Flight(models.Model):
     
     
 class FlightBooking(models.Model):
-    STATUS_CHOICES = [
+
+    BOOKING_STATUS = [
         ("pending", "Pending"),
         ("confirmed", "Confirmed"),
         ("cancelled", "Cancelled"),
+        ("completed", "Completed"),
     ]
 
     user = models.ForeignKey(
         "accounts.User",
         on_delete=models.CASCADE,
-        related_name="flight_bookings"
+        related_name="flight_bookings",
     )
 
     flight = models.ForeignKey(
         Flight,
         on_delete=models.CASCADE,
-        related_name="bookings"
+        related_name="bookings",
     )
 
-    booking_date = models.DateTimeField(auto_now_add=True)
-
-    passengers = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)]
-    )
+    passengers = models.PositiveIntegerField(default=1)
 
     total_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=Decimal("0.00")
     )
 
-    status = models.CharField(
+    booking_status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
-        default="pending"
+        choices=BOOKING_STATUS,
+        default="pending",
+    )
+
+    payment_status = models.BooleanField(default=False)
+
+    booking_date = models.DateTimeField(
+        auto_now_add=True
     )
 
     created_at = models.DateTimeField(
@@ -181,18 +184,10 @@ class FlightBooking(models.Model):
     )
 
     class Meta:
-        ordering = ["-created_at"]
-
-    booking_reference = models.CharField(
-        max_length=20,
-        unique=True,
-        editable=False
-    )
-
-    def save(self, *args, **kwargs):
-        if not self.booking_reference:
-            self.booking_reference = f"FB-{uuid.uuid4().hex[:8].upper()}"
-        super().save(*args, **kwargs)
+        ordering = ["-booking_date"]
 
     def __str__(self):
-        return f"{self.booking_reference} - {self.flight.flight_number}"
+        return (
+            f"{self.user.email} - "
+            f"{self.flight.flight_number}"
+        )

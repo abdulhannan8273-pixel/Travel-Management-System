@@ -14,26 +14,64 @@ from apps.payments.models import Payment
 from apps.reports.models import Report
 
 
-@api_view(["GET"])
-@permission_classes([IsAdminUser])
-def dashboard_stats(request):
-    total_revenue = Payment.objects.filter(
-        payment_status="success"
-    ).aggregate(
-        total=Sum("amount")
-    )["total"] or Decimal("0.00")
+successful_payments = Payment.objects.filter(
+    payment_status="success"
+).count()
 
-    data = {
-        "total_users": User.objects.count(),
-        "total_destinations": Destination.objects.count(),
-        "total_hotels": Hotel.objects.count(),
-        "total_rooms": Room.objects.count(),
-        "total_flights": Flight.objects.count(),
-        "total_flight_bookings": FlightBooking.objects.count(),
-        "total_hotel_bookings": Booking.objects.count(),
-        "total_payments": Payment.objects.count(),
-        "total_reports": Report.objects.count(),
-        "total_revenue": total_revenue,
-    }
 
-    return Response(data)
+
+
+pending_payments = Payment.objects.filter(
+    payment_status="pending"
+).count()
+
+
+
+
+failed_payments = Payment.objects.filter(
+    payment_status="failed"
+).count()
+
+
+
+refunded_payments = Payment.objects.filter(
+    payment_status="refunded"
+).count()
+
+
+
+
+active_flights = Flight.objects.filter(
+    is_active=True
+).count()
+
+
+
+
+confirmed_bookings = Booking.objects.filter(
+    status="confirmed"
+).count()
+
+
+
+cancelled_bookings = Booking.objects.filter(
+    status="cancelled"
+).count()
+
+
+
+
+confirmed_flight_bookings = FlightBooking.objects.filter(
+    booking_status="confirmed"
+).count()
+
+dashboard_metrics = {
+    "successful_payments": successful_payments,
+    "pending_payments": pending_payments,
+    "failed_payments": failed_payments,
+    "refunded_payments": refunded_payments,
+    "active_flights": active_flights,
+    "confirmed_bookings": confirmed_bookings,
+    "cancelled_bookings": cancelled_bookings,
+    "confirmed_flight_bookings": confirmed_flight_bookings,
+}

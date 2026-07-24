@@ -25,10 +25,20 @@ class Payment(models.Model):
         related_name="payments"
     )
 
-    booking = models.ForeignKey(
+    destination_booking = models.OneToOneField(
         "bookings.Booking",
         on_delete=models.CASCADE,
-        related_name="payments"
+        null=True,
+        blank=True,
+        related_name="payment"
+    )
+
+    flight_booking = models.OneToOneField(
+        "flights.FlightBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="payment"
     )
 
     transaction_id = models.CharField(

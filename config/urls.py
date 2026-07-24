@@ -19,9 +19,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+)
 
 urlpatterns = [
+
     path('admin/', admin.site.urls),
+    path("api-auth/", include("rest_framework.urls")),
     path("api/accounts/", include("apps.accounts.urls")),
     path("api/destinations/", include("apps.destinations.urls")),
     path("api/locations/", include("apps.locations.urls")),
@@ -34,6 +40,9 @@ urlpatterns = [
     path("api/", include("apps.payments.urls")),
     path("api/", include("apps.reports.urls")),
     path("api/", include("apps.dashboard.urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui",),
+    path("api/", include("apps.notifications.urls")),
 ]
 
 if settings.DEBUG:

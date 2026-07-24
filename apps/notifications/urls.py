@@ -1,12 +1,14 @@
 from rest_framework.routers import DefaultRouter
-from .views import PaymentViewSet
+
+from .views import NotificationViewSet
+
 
 router = DefaultRouter()
 
 router.register(
-    r"payments",
-    PaymentViewSet,
-    basename="payment",
+    r"notifications",
+    NotificationViewSet,
+    basename="notification"
 )
 
 urlpatterns = router.urls

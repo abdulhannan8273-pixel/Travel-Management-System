@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
-
+    'drf_spectacular',
     # Local apps
     'apps.accounts',
     'apps.users',
@@ -103,6 +103,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -113,10 +114,9 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-
+    'DEFAULT_PAGINATION_CLASS': 'config.pagination.CustomPagination',
     'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -128,3 +128,12 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@travelapp.com'
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Travel Application API",
+    "DESCRIPTION": "API documentation for the Travel Application.",
+    "VERSION": "1.0.0",
+}
+# Browser Login Redirect
+LOGIN_REDIRECT_URL = "/api/dashboard/"
+LOGOUT_REDIRECT_URL = "/api-auth/login/"

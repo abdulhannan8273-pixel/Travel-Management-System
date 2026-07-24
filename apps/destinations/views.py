@@ -6,6 +6,15 @@ from .serializers import (DestinationSerializer, DestinationImageSerializer, Att
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .permissions import IsAdminOrReadOnly
+from .csv_import import import_destinations
+from .serializers import CSVUploadSerializer
+
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+
+
 
 class DestinationViewSet(viewsets.ModelViewSet):
     queryset = Destination.objects.all()
@@ -67,3 +76,23 @@ class AttractionViewSet(viewsets.ModelViewSet):
     queryset = Attraction.objects.all()
     serializer_class = AttractionSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+class DestinationCSVImportView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = CSVUploadSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        file = serializer.validated_data.get("file")
+
+        if file is None:
+            return Response(
+                {"error": "File is required."},
+                status=400,
+            )
+
+        return import_destinations(file)

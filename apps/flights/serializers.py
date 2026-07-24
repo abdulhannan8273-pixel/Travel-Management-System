@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Airline, Airport, Flight, FlightBooking
+from .models import (Airline, Airport, Flight, FlightBooking,)
 from decimal import Decimal
 from django.utils import timezone
+from apps.notifications.models import Notification
 
 class AirlineSerializer(serializers.ModelSerializer):
     class Meta:
@@ -136,5 +137,19 @@ class FlightBookingSerializer(serializers.ModelSerializer):
 
         flight.available_seats -= passengers
         flight.save()
-
+        Notification.objects.create(
+            user=validated_data["user"],
+            title="Flight Booked",
+            message=f"Flight {flight.flight_number} booked successfully."
+            )
         return super().create(validated_data)
+    
+class CSVUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
+    def validate_file(self, value):
+        if not value.name.endswith(".csv"):
+            raise serializers.ValidationError(
+                "Only CSV files are allowed."
+            )
+        return value

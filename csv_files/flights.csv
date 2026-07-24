@@ -1,0 +1,5 @@
+flight_number,airline_code,source_airport,destination_airport,departure_time,arrival_time,flight_class,price,total_seats,status
+AI101,AI,DEL,BOM,2026-08-01 09:00:00,2026-08-01 11:15:00,economy,5200,180,scheduled
+6E205,6E,DEL,JAI,2026-08-01 13:00:00,2026-08-01 14:10:00,economy,3200,186,scheduled
+EK501,EK,DXB,DEL,2026-08-02 08:00:00,2026-08-02 13:10:00,business,18000,300,scheduled
+QR570,QR,DOH,DEL,2026-08-03 02:00:00,2026-08-03 08:10:00,business,17000,280,scheduled

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Booking
 from datetime import date
+from apps.notifications.models import Notification
+
 
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,7 +45,19 @@ class BookingSerializer(serializers.ModelSerializer):
             )
 
         return value
-    
+
+    def create(self, validated_data):
+        validated_data["user"] = self.context["request"].user
+
+        booking = super().create(validated_data)
+        # create notification for the user after booking is created
+        Notification.objects.create(
+            user=booking.user,
+            title="Destination Booked",
+            message=f"Your booking for {booking.destination.name} has been created."
+        )
+
+        return booking
 class BookingStatusSerializer(serializers.Serializer):
     status = serializers.ChoiceField(
         choices=["pending", "confirmed", "completed", "cancelled"]

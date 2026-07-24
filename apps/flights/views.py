@@ -1,19 +1,27 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import filters, viewsets, status
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from apps.accounts.permissions import IsAdminOrReadOnly
-from .models import Airline, Airport, Flight, FlightBooking
+from .models import Airline, Airport, Flight
 from .serializers import (
     AirlineSerializer,
     AirportSerializer,
     FlightSerializer,
-    FlightBookingSerializer,
+    CSVUploadSerializer,
 )
+from .csv_import import (
+    import_airlines,
+    import_airports,
+    import_flights,
+)
+from rest_framework.permissions import IsAuthenticated
+from .models import FlightBooking
+from .serializers import FlightBookingSerializer
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
-
 
 
 class AirlineViewSet(viewsets.ModelViewSet):
@@ -113,43 +121,197 @@ class FlightViewSet(viewsets.ModelViewSet):
         "created_at",
     ]
 
-
 class FlightBookingViewSet(viewsets.ModelViewSet):
-    queryset = FlightBooking.objects.select_related("user", "flight")
     serializer_class = FlightBookingSerializer
     permission_classes = [IsAuthenticated]
 
-    ...
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    filterset_fields = [
+        "booking_status",
+        "payment_status",
+        "flight",
+    ]
+
+    search_fields = [
+        "flight__flight_number",
+        "flight__airline__name",
+    ]
+
+    ordering_fields = [
+        "booking_date",
+        "created_at",
+        "total_price",
+    ]
 
     def get_queryset(self):
         if self.request.user.is_staff:
             return FlightBooking.objects.select_related(
                 "user",
-                "flight"
+                "flight",
+                "flight__airline",
             )
 
         return FlightBooking.objects.select_related(
             "user",
-            "flight"
+            "flight",
+            "flight__airline",
         ).filter(user=self.request.user)
 
-    @action(detail=True, methods=["patch"])
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):
         booking = self.get_object()
 
-        if booking.status == "cancelled":
+        # Sirf owner ya admin cancel kar sakta hai
+        if (
+            booking.user != request.user
+            and not request.user.is_staff
+        ):
             return Response(
-                {"message": "Booking is already cancelled."},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    "success": False,
+                    "message": "Permission denied."
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        booking.status = "cancelled"
+        # Already cancelled
+        if booking.booking_status == "cancelled":
+            return Response(
+                {
+                    "success": False,
+                    "message": "Booking is already cancelled."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
+        # Completed booking cancel nahi hogi
+        if booking.booking_status == "completed":
+            return Response(
+                {
+                    "success": False,
+                    "message": "Completed booking cannot be cancelled."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Seats wapas add karo
         booking.flight.available_seats += booking.passengers
         booking.flight.save()
 
+        booking.booking_status = "cancelled"
         booking.save()
 
         return Response(
-            {"message": "Booking cancelled successfully."}
+            {
+                "success": True,
+                "message": "Booking cancelled successfully."
+            },
+            status=status.HTTP_200_OK,
         )
+    @action(detail=False, methods=["get"])
+    def my_bookings(self, request):
+        bookings = (
+            FlightBooking.objects
+            .filter(user=request.user)
+            .select_related(
+                "flight",
+                "flight__airline",
+                "flight__source_airport",
+                "flight__destination_airport",
+            )
+            .order_by("-booking_date")
+        )
+
+        serializer = self.get_serializer(bookings, many=True)
+
+        return Response(
+            {
+                "success": True,
+                "count": bookings.count(),
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+    
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {
+                "success": False,
+                "message": "Bookings cannot be deleted. Please cancel the booking instead."
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+    
+
+class FlightCSVImportView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = CSVUploadSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file = serializer.validated_data.get("file")
+
+        if file is None:
+            return Response(
+                {"error": "File is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return import_flights(file)
+    
+class AirlineCSVImportView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = CSVUploadSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        validated_data = dict(serializer.validated_data)
+        file = validated_data.get("file")
+
+        if file is None:
+            return Response(
+                {"error": "File is required."},
+                status=400,
+            )
+
+        return import_airlines(file)
+    
+class AirportCSVImportView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = CSVUploadSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        validated_data = dict(serializer.validated_data)
+        file = validated_data.get("file")
+
+        if file is None:
+            return Response(
+                {"error": "File is required."},
+                status=400,
+            )
+
+        return import_airports(file)
