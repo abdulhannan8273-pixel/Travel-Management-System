@@ -1,0 +1,161 @@
+.login-page {
+  min-height: calc(100vh - 80px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 60px 20px;
+
+  background-color: #f8f9fa;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 450px;
+
+  padding: 40px;
+
+  background-color: white;
+
+  border-radius: 12px;
+
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h1 {
+  margin: 0 0 10px;
+
+  font-size: 32px;
+}
+
+.login-header p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 13px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #ddd;
+  border-radius: 6px;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: #0077ff;
+}
+
+.login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 13px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.login-options a,
+.register-link a {
+  color: #0077ff;
+  text-decoration: none;
+}
+
+.login-options a:hover,
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+.login-btn {
+  width: 100%;
+
+  padding: 13px;
+
+  border: none;
+  border-radius: 6px;
+
+  background-color: #0077ff;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.login-btn:hover {
+  background-color: #005fcc;
+}
+
+.register-link {
+  margin-top: 25px;
+
+  text-align: center;
+}
+
+.register-link p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 14px;
+}
+
+
+@media (max-width: 600px) {
+
+  .login-page {
+    padding: 40px 20px;
+  }
+
+  .login-card {
+    padding: 30px 20px;
+  }
+
+  .login-header h1 {
+    font-size: 28px;
+  }
+
+  .login-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

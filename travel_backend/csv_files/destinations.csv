@@ -1,0 +1,4 @@
+name,country_code,state_code,city_name,description,price,rating,best_time_to_visit,is_featured,weather,latitude,longitude,currency,language,timezone,popular_attractions,travel_tips,average_budget
+Amber Fort,IN,RJ,Jaipur,Historic hill fort,500,4.8,October-March,True,Sunny,26.985486,75.851345,INR,Hindi,Asia/Kolkata,"Sheesh Mahal, Courtyard","Visit early morning",2500
+Hawa Mahal,IN,RJ,Jaipur,Palace of Winds,300,4.7,October-March,True,Sunny,26.923936,75.826744,INR,Hindi,Asia/Kolkata,"953 Windows","Carry water",1500
+Taj Mahal,IN,UP,Agra,World famous monument,800,5.0,November-February,True,Clear,27.175015,78.042155,INR,Hindi,Asia/Kolkata,"Mausoleum, Gardens","Book tickets online",3000

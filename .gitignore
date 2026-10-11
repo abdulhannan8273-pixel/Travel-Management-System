@@ -1,0 +1,43 @@
+# Stale duplicate backend at root (real one is in travel_backend/)
+/apps/
+/config/
+/manage.py
+/requirements.txt
+/requirements/
+/__init__.py
+
+# Virtual environments
+.venv/
+.venv-1/
+myenv/
+**/myenv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Django
+db.sqlite3
+**/db.sqlite3
+*.log
+/staticfiles/
+media/
+**/media/
+travel_backend/static/
+
+# Secrets
+.env
+**/.env
+
+# Frontend
+node_modules/
+**/node_modules/
+dist/
+build/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
