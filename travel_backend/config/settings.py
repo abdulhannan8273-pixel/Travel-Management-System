@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'apps.flights',
     'apps.notifications',
     'apps.packages',
+    'apps.coupons',
+    'apps.search',  
 ]
 
 MIDDLEWARE = [
