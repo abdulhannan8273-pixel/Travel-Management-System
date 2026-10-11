@@ -1,5 +1,6 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import PaymentViewSet
+from .views import PaymentViewSet, RazorpayWebhookView
 
 router = DefaultRouter()
 
@@ -9,4 +10,6 @@ router.register(
     basename="payment",
 )
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("payments/razorpay-webhook/", RazorpayWebhookView.as_view(), name="razorpay-webhook"),
+] + router.urls

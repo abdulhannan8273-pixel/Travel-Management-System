@@ -17,8 +17,9 @@ class PaymentSerializer(serializers.ModelSerializer):
             "paid_at",
             "created_at",
             "updated_at",
+            "razorpay_order_id",
+            "razorpay_payment_id",
         ]
-
     def validate(self, attrs):
 
         destination_booking = attrs.get("destination_booking")
