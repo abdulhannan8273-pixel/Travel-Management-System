@@ -53,7 +53,12 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.packages',
     'apps.coupons',
-    'apps.search',  
+    'apps.search',
+    'apps.faqs',
+    'apps.contact',
+    'apps.newsletter',
+  
+    
 ]
 
 MIDDLEWARE = [
