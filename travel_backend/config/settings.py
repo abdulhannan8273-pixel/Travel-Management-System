@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django_filters',
     # Local apps
     'apps.accounts',
-    'apps.users',
     'apps.dashboard',
     'apps.reviews',
     'apps.wishlist',
@@ -57,7 +56,8 @@ INSTALLED_APPS = [
     'apps.faqs',
     'apps.contact',
     'apps.newsletter',
-  
+    'apps.blogs',
+    'apps.uploads',
     
 ]
 
