@@ -14,18 +14,24 @@ class BookingSerializer(serializers.ModelSerializer):
         if value < date.today():
             raise serializers.ValidationError("Booking date cannot be in the past.")
         return value
-    
+
     def validate(self, attrs):
         user = self.context["request"].user
 
-       
         destination = attrs.get("destination")
+        package = attrs.get("package")
         booking_date = attrs.get("booking_date")
+
+        if package and destination and package.Destination_id != destination.id:
+            raise serializers.ValidationError(
+                "This package does not belong to the selected destination."
+            )
 
         if destination and booking_date:
             if Booking.objects.filter(
                 user=user,
                 destination=destination,
+                package=package,
                 booking_date=booking_date,
             ).exists():
                 raise serializers.ValidationError(
@@ -48,13 +54,13 @@ class BookingSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data["user"] = self.context["request"].user
-
         booking = super().create(validated_data)
         # create notification for the user after booking is created
+        target_name = booking.package.name if booking.package else booking.destination.name
         Notification.objects.create(
             user=booking.user,
             title="Destination Booked",
-            message=f"Your booking for {booking.destination.name} has been created."
+            message=f"Your booking for {target_name} has been created."
         )
 
         return booking

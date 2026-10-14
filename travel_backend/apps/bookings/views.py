@@ -24,15 +24,12 @@ class BookingViewSet(viewsets.ModelViewSet):
         "status",
         "booking_date",
         "destination",
+        "package",
     ]
 
     search_fields = [
         "destination__name",
-    ]
-    ordering_fields = [
-        "created_at",
-        "booking_date",
-        "total_price",
+        "package__name",
     ]
 
     def get_queryset(self):
@@ -41,22 +38,24 @@ class BookingViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return (
                 Booking.objects
-                .select_related("user", "destination")
+                .select_related("user", "destination", "package")
                 .order_by("-created_at")
             )
 
         return (
             Booking.objects
-            .select_related("destination")
+            .select_related("destination", "package")
             .filter(user=user)
             .order_by("-created_at")
         )
 
     def perform_create(self, serializer):
         destination = serializer.validated_data["destination"]
+        package = serializer.validated_data.get("package")
         people = serializer.validated_data["number_of_people"]
 
-        total = Decimal(destination.price) * people
+        unit_price = package.price if package else destination.price
+        total = Decimal(unit_price) * people
 
         serializer.save(
             user=self.request.user,

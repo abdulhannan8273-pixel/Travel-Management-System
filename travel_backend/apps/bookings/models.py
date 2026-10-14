@@ -4,6 +4,14 @@ from django.conf import settings
 class Booking(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     destination = models.ForeignKey('destinations.Destination', on_delete=models.CASCADE)
+    package = models.ForeignKey(
+        'packages.Package',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bookings",
+        help_text="Optional — set when the user booked a specific tour package rather than just the destination.",
+    )
     booking_date = models.DateField()
     number_of_people = models.PositiveIntegerField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -21,4 +29,5 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     upadte_at = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return f"Booking by {self.user} to {self.destination} on {self.booking_date}"
+        target = self.package.name if self.package else self.destination.name
+        return f"Booking by {self.user} for {target} on {self.booking_date}"
