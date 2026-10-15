@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Package, PackageImage
+from .models import Package, PackageImage, PackageVideo
 from apps.destinations.models import Destination
 from apps.destinations.serializers import DestinationSerializer
 
@@ -11,8 +11,17 @@ class PackageImageSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
+class PackageVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PackageVideo
+        fields = "__all__"
+        read_only_fields = ["id", "created_at"]
+
+
 class PackageSerializer(serializers.ModelSerializer):
     gallery = PackageImageSerializer(many=True, read_only=True)
+    videos = PackageVideoSerializer(many=True, read_only=True)
+    faqs = serializers.SerializerMethodField()
 
     # GET response
     destination_details = DestinationSerializer(source="Destination", read_only=True)
@@ -24,3 +33,8 @@ class PackageSerializer(serializers.ModelSerializer):
         model = Package
         fields = "__all__"
         read_only_fields = ["slug", "rating"]
+
+    def get_faqs(self, obj):
+        # Local import avoids any import-order issues between the faqs and packages apps.
+        from apps.faqs.serializers import FAQSerializer
+        return FAQSerializer(obj.faqs.filter(is_active=True), many=True).data

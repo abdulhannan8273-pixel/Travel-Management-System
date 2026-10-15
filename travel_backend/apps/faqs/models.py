@@ -2,6 +2,14 @@ from django.db import models
 
 
 class FAQ(models.Model):
+    package = models.ForeignKey(
+        "packages.Package",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="faqs",
+        help_text="Leave blank for a general sitewide FAQ; set this to attach the FAQ to one specific package.",
+    )
     question = models.CharField(max_length=500)
     answer = models.TextField()
     category = models.CharField(max_length=100, blank=True)

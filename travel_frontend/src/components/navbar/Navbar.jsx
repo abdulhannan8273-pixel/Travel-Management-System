@@ -21,9 +21,9 @@ function Navbar() {
           <button className="login-btn">Login</button>
         </Link>
 
-        <Link to="/signup">
-          <button className="signup-btn">Sign Up</button>
-        </Link>
+      <Link to="/register">
+        <button className="signup-btn">Sign Up</button>
+      </Link>
       </div>
     </nav>
   );

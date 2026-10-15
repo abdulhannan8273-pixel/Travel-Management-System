@@ -12,7 +12,7 @@ class FAQViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ["category", "is_active"]
+    filterset_fields = ["category", "is_active", "package"]
     search_fields = ["question", "answer"]
 
     def get_queryset(self):

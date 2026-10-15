@@ -4,13 +4,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from .models import Package, PackageImage
-from .serializers import PackageSerializer, PackageImageSerializer
+from .models import Package, PackageImage, PackageVideo
+from .serializers import PackageSerializer, PackageImageSerializer, PackageVideoSerializer
 from apps.destinations.permissions import IsAdminOrReadOnly
 
 
 class PackageViewSet(viewsets.ModelViewSet):
-    queryset = Package.objects.select_related("Destination").prefetch_related("gallery").all()
+    queryset = Package.objects.select_related("Destination").prefetch_related("gallery", "videos", "faqs").all()
     serializer_class = PackageSerializer
     permission_classes = [IsAdminOrReadOnly]
 
@@ -67,6 +67,14 @@ class PackageViewSet(viewsets.ModelViewSet):
 class PackageImageViewSet(viewsets.ModelViewSet):
     queryset = PackageImage.objects.select_related("package").all()
     serializer_class = PackageImageSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["package"]
+
+
+class PackageVideoViewSet(viewsets.ModelViewSet):
+    queryset = PackageVideo.objects.select_related("package").all()
+    serializer_class = PackageVideoSerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["package"]
