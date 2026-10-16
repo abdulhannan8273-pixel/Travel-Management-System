@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import models
 import uuid
 
-
+#----------------------------payment model------------------------------------------------------------------------------------------------------------
 class Payment(models.Model):
     PAYMENT_METHODS = [
         ("upi", "UPI"),
@@ -25,6 +25,7 @@ class Payment(models.Model):
         related_name="payments"
     )
 
+#----------------------------booking, flight booking, hotel booking relations------------------------------------------------------------------------------------------------------------
     destination_booking = models.OneToOneField(
         "bookings.Booking",
         on_delete=models.CASCADE,
@@ -40,6 +41,17 @@ class Payment(models.Model):
         blank=True,
         related_name="payment"
     )
+
+
+    hotel_booking = models.OneToOneField(
+        "hotels.HotelBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="payment"
+    )
+
+#----------------------------payment fields------------------------------------------------------------------------------------------------------------
 
     transaction_id = models.CharField(
         max_length=100,
@@ -84,7 +96,8 @@ class Payment(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
+#----------------------------payment model meta and save method------------------------------------------------------------------------------------------------------------
     class Meta:
         ordering = ["-created_at"]
 

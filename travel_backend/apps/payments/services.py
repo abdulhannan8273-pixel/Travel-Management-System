@@ -8,7 +8,7 @@ and notification logic only lives in one place.
 from django.utils import timezone
 from apps.notifications.models import Notification
 
-
+#----------------------------payment status transition functions------------------------------------------------------------------------------------------------------------
 def mark_payment_success(payment, razorpay_payment_id=None):
     """Returns True if the payment was moved to 'success', False if it already was."""
     if payment.payment_status == "success":
@@ -33,6 +33,11 @@ def mark_payment_success(payment, razorpay_payment_id=None):
         payment.flight_booking.payment_status = True
         payment.flight_booking.save(update_fields=["booking_status", "payment_status"])
 
+    if payment.hotel_booking:
+        payment.hotel_booking.booking_status = "confirmed"
+        payment.hotel_booking.payment_status = True
+        payment.hotel_booking.save(update_fields=["booking_status", "payment_status"])
+
     Notification.objects.create(
         user=payment.user,
         title="Payment Successful",
@@ -40,6 +45,7 @@ def mark_payment_success(payment, razorpay_payment_id=None):
     )
     return True
 
+#----------------------------payment status transition functions------------------------------------------------------------------------------------------------------------
 
 def mark_payment_failed(payment):
     """Returns True if the payment was moved to 'failed', False if it already was."""
@@ -49,10 +55,25 @@ def mark_payment_failed(payment):
     payment.payment_status = "failed"
     payment.save(update_fields=["payment_status"])
 
+    # A failed payment means the booking never actually went through, so any
+    # inventory that was provisionally reserved at booking-creation time
+    # (flight seats, hotel rooms) must be given back — otherwise it's lost
+    # forever even though nobody is actually occupying it.
     if payment.flight_booking:
-        payment.flight_booking.booking_status = "cancelled"
-        payment.flight_booking.payment_status = False
-        payment.flight_booking.save(update_fields=["booking_status", "payment_status"])
+        flight_booking = payment.flight_booking
+        flight_booking.booking_status = "cancelled"
+        flight_booking.payment_status = False
+        flight_booking.flight.available_seats += flight_booking.passengers
+        flight_booking.flight.save(update_fields=["available_seats"])
+        flight_booking.save(update_fields=["booking_status", "payment_status"])
+
+    if payment.hotel_booking:
+        hotel_booking = payment.hotel_booking
+        hotel_booking.booking_status = "cancelled"
+        hotel_booking.payment_status = False
+        hotel_booking.room.available_rooms += hotel_booking.number_of_rooms
+        hotel_booking.room.save(update_fields=["available_rooms"])
+        hotel_booking.save(update_fields=["booking_status", "payment_status"])
 
     Notification.objects.create(
         user=payment.user,
@@ -61,6 +82,7 @@ def mark_payment_failed(payment):
     )
     return True
 
+#----------------------------payment status transition functions------------------------------------------------------------------------------------------------------------
 
 def mark_payment_refunded(payment):
     """Returns True if the payment was moved to 'refunded', False if it wasn't eligible."""
@@ -82,6 +104,14 @@ def mark_payment_refunded(payment):
         flight_booking.flight.available_seats += flight_booking.passengers
         flight_booking.flight.save(update_fields=["available_seats"])
         flight_booking.save(update_fields=["booking_status", "payment_status"])
+
+    if payment.hotel_booking:
+        hotel_booking = payment.hotel_booking
+        hotel_booking.booking_status = "cancelled"
+        hotel_booking.payment_status = False
+        hotel_booking.room.available_rooms += hotel_booking.number_of_rooms
+        hotel_booking.room.save(update_fields=["available_rooms"])
+        hotel_booking.save(update_fields=["booking_status", "payment_status"])
 
     Notification.objects.create(
         user=payment.user,

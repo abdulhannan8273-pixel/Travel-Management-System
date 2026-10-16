@@ -22,6 +22,7 @@ class PackageSerializer(serializers.ModelSerializer):
     gallery = PackageImageSerializer(many=True, read_only=True)
     videos = PackageVideoSerializer(many=True, read_only=True)
     faqs = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
 
     # GET response
     destination_details = DestinationSerializer(source="Destination", read_only=True)
@@ -35,6 +36,9 @@ class PackageSerializer(serializers.ModelSerializer):
         read_only_fields = ["slug", "rating"]
 
     def get_faqs(self, obj):
-        # Local import avoids any import-order issues between the faqs and packages apps.
         from apps.faqs.serializers import FAQSerializer
         return FAQSerializer(obj.faqs.filter(is_active=True), many=True).data
+
+    def get_reviews(self, obj):
+        from apps.reviews.serializers import ReviewSerializer
+        return ReviewSerializer(obj.reviews.all(), many=True).data

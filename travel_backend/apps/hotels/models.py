@@ -192,3 +192,56 @@ class HotelPolicy(models.Model):
 
     def __str__(self):
         return f"{self.hotel.name} - {self.title}"
+
+# Hotel Booking module----------------------------------------------------------------------------------------------------------------
+
+class HotelBooking(models.Model):
+    BOOKING_STATUS = [
+        ("pending", "Pending"),
+        ("confirmed", "Confirmed"),
+        ("cancelled", "Cancelled"),
+        ("completed", "Completed"),
+    ]
+
+    user = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="hotel_bookings",
+    )
+
+    hotel = models.ForeignKey(
+        Hotel,
+        on_delete=models.CASCADE,
+        related_name="bookings",
+    )
+
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        related_name="bookings",
+    )
+
+    check_in_date = models.DateField()
+    check_out_date = models.DateField()
+    number_of_rooms = models.PositiveIntegerField(default=1)
+    number_of_guests = models.PositiveIntegerField(default=1)
+
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    booking_status = models.CharField(
+        max_length=20,
+        choices=BOOKING_STATUS,
+        default="pending",
+    )
+
+    payment_status = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "hotel_bookings"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user} - {self.hotel.name} ({self.check_in_date} to {self.check_out_date})"

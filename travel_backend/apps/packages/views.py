@@ -10,7 +10,7 @@ from apps.destinations.permissions import IsAdminOrReadOnly
 
 
 class PackageViewSet(viewsets.ModelViewSet):
-    queryset = Package.objects.select_related("Destination").prefetch_related("gallery", "videos", "faqs").all()
+    queryset = Package.objects.select_related("Destination").prefetch_related("gallery", "videos", "faqs", "reviews").all()
     serializer_class = PackageSerializer
     permission_classes = [IsAdminOrReadOnly]
 

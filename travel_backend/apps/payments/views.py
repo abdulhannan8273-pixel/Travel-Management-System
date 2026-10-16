@@ -19,14 +19,18 @@ from .models import Payment
 from .serializers import PaymentSerializer
 from .services import mark_payment_success, mark_payment_failed, mark_payment_refunded
 
+#----------------------------payment viewset------------------------------------------------------------------------------------------------------------
 
 class PaymentViewSet(viewsets.ModelViewSet):
+
+    #----------------------------queryset, serializer, permissions, filters------------------------------------------------------------------------------------------------------------
+
     queryset: QuerySet[Payment] = Payment.objects.select_related(
         "user",
         "destination_booking",
         "flight_booking",
+        "hotel_booking",
     )
-
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -49,6 +53,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
         "created_at",
         "amount",
     ]
+
+#----------------------------queryset, serializer, permissions, filters------------------------------------------------------------------------------------------------------------
 
     def get_queryset(self) -> QuerySet[Payment]:  # type: ignore[override]
         if self.request.user.is_staff:
@@ -136,6 +142,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+#----------------------------razorpay webhook view------------------------------------------------------------------------------------------------------------
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RazorpayWebhookView(APIView):

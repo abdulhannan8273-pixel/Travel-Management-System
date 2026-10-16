@@ -7,6 +7,8 @@ class ReviewAdmin(admin.ModelAdmin):
         "id",
         "user",
         "destination",
+        "package",
+        "hotel",
         "rating",
         "created_at",
     )
@@ -19,4 +21,6 @@ class ReviewAdmin(admin.ModelAdmin):
     search_fields = (
         "user__email",
         "destination__name",
+        "package__name",
+        "hotel__name",
     )
